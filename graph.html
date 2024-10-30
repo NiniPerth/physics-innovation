@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Plotting Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Graph Plotting Tool</h1>
+        <nav>
+            <ul>
+                <li><a href="fizik.html">Home</a></li>
+                <li><a href="linearmotion.html">Linear Motion</a></li>
+                <li><a href="projectilemotion.html">Projectile Motion</a></li>
+				<li><a href="image-solver.html">Image Solver</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="graph">
+            <h2>Plot Graphs</h2>
+            <label for="graph-title">Graph Title:</label>
+            <input type="text" id="graph-title" placeholder="Enter graph title">
+
+            <!-- Increased width and height of the canvas for a larger graph -->
+            <canvas id="plot" width="900" height="600"></canvas>
+
+            <label for="x-values">X-values (comma-separated):</label>
+            <input type="text" id="x-values" placeholder="e.g., 0,1,2,3,4">
+
+            <label for="y-values">Y-values (comma-separated):</label>
+            <input type="text" id="y-values" placeholder="e.g., 0,1,4,9,16">
+
+            <label for="x-label">X-axis Label (symbol and unit):</label>
+            <input type="text" id="x-label" placeholder="e.g., Time (s)">
+
+            <label for="y-label">Y-axis Label (symbol and unit):</label>
+            <input type="text" id="y-label" placeholder="e.g., Distance (m)">
+
+            <button onclick="plotGraph()">Plot Graph</button>
+            <button onclick="clearGraph()">Clear</button>
+
+            <div class="centroid-display" id="centroid-display"></div>
+            <div class="gradient-display" id="gradient-display"></div>
+        </section>
+    </main>
+
+    <script>
+        const cmToPixels = 37.8; // Approximate pixels in 1 cm
+        const smallSquareSize = cmToPixels / 8; // Adjusted size of each small square for larger canvas
+
+        function drawGrid(ctx, width, height) {
+            ctx.strokeStyle = '#e0e0e0'; // Light grey color for grid
+            ctx.lineWidth = 0.5;
+
+            for (let x = 40; x < width - 40; x += smallSquareSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 40);
+                ctx.lineTo(x, height - 40);
+                ctx.stroke();
+            }
+
+            for (let y = 40; y < height - 40; y += smallSquareSize) {
+                ctx.beginPath();
+                ctx.moveTo(40, y);
+                ctx.lineTo(width - 40, y);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = '#b0b0b0'; // Darker grey for major grid lines
+            for (let x = 40; x < width - 40; x += smallSquareSize * 5) {
+                ctx.beginPath();
+                ctx.moveTo(x, 40);
+                ctx.lineTo(x, height - 40);
+                ctx.stroke();
+            }
+
+            for (let y = 40; y < height - 40; y += smallSquareSize * 5) {
+                ctx.beginPath();
+                ctx.moveTo(40, y);
+                ctx.lineTo(width - 40, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawAxes(ctx, width, height, xMax, yMax, xLabel, yLabel) {
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+
+            ctx.beginPath();
+            ctx.moveTo(40, height - 40);
+            ctx.lineTo(width - 40, height - 40);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(40, 40);
+            ctx.lineTo(40, height - 40);
+            ctx.stroke();
+
+            ctx.font = "12px Arial";
+            ctx.fillStyle = 'black';
+
+            for (let i = 0; i <= xMax; i++) {
+                let x = 40 + i * (smallSquareSize * 10);
+                ctx.fillText(i, x, height - 25);
+            }
+
+            for (let j = 0; j <= yMax; j += 10) {
+                let y = height - 40 - j * (smallSquareSize);
+                ctx.fillText(j, 10, y + 5);
+            }
+
+            ctx.font = "16px Arial";
+            ctx.fillText(xLabel, (width - 40) / 2, height - 10);
+            ctx.save();
+            ctx.translate(10, (height - 40) / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(yLabel, 0, 0);
+            ctx.restore();
+        }
+
+        function calculateBestFitLine(xValues, yValues) {
+            const n = xValues.length;
+            const sumX = xValues.reduce((a, b) => a + b, 0);
+            const sumY = yValues.reduce((a, b) => a + b, 0);
+            const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
+            const sumX2 = xValues.reduce((sum, x) => sum + x * x, 0);
+
+            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+
+            return { slope, intercept };
+        }
+
+        function plotGraph() {
+            let xValues = document.getElementById('x-values').value.split(',').map(Number);
+            let yValues = document.getElementById('y-values').value.split(',').map(Number);
+            let xLabel = document.getElementById('x-label').value;
+            let yLabel = document.getElementById('y-label').value;
+            let graphTitle = document.getElementById('graph-title').value;
+
+            if (xValues.length < 4 || xValues.length !== yValues.length || xValues.some(isNaN) || yValues.some(isNaN)) {
+                alert("Please enter at least 4 valid x and y values.");
+                return;
+            }
+
+            let canvas = document.getElementById('plot');
+            let ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawGrid(ctx, canvas.width, canvas.height);
+
+            const xMax = Math.max(...xValues);
+            const yMax = Math.max(...yValues);
+
+            drawAxes(ctx, canvas.width, canvas.height, xMax, yMax, xLabel, yLabel);
+
+            // Draw graph title
+            ctx.font = "20px Arial";
+            ctx.fillStyle = 'black';
+            ctx.fillText(graphTitle, (canvas.width / 2) - (ctx.measureText(graphTitle).width / 2), 30);
+
+            let sumX = 0, sumY = 0;
+
+            ctx.fillStyle = 'black';
+            for (let i = 0; i < xValues.length; i++) {
+                let x = 40 + xValues[i] * (smallSquareSize * 10);
+                let y = canvas.height - 40 - yValues[i] * (smallSquareSize);
+
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                sumX += xValues[i];
+                sumY += yValues[i];
+            }
+
+            const centroidX = sumX / xValues.length;
+            const centroidY = sumY / yValues.length;
+
+            let centroidScreenX = 40 + centroidX * (smallSquareSize * 10);
+            let centroidScreenY = canvas.height - 40 - centroidY * (smallSquareSize);
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.arc(centroidScreenX, centroidScreenY, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Calculate best fit line
+            const { slope, intercept } = calculateBestFitLine(xValues, yValues);
+
+            // Draw best fit line
+            ctx.strokeStyle = '#1e88e5'; // Blue for the best fit line
+            ctx.beginPath();
+            ctx.moveTo(40, canvas.height - 40 - (intercept * smallSquareSize));
+            ctx.lineTo(40 + (xMax * (smallSquareSize * 10)), canvas.height - 40 - ((intercept + slope * xMax) * smallSquareSize));
+            ctx.stroke();
+
+            // Display centroid calculations
+            const centroidDisplay = document.getElementById('centroid-display');
+            centroidDisplay.innerHTML = 
+                `Centroid Calculation:<br>
+                Cx = Σx / n = ${sumX} / ${xValues.length} = ${centroidX.toFixed(2)}<br>
+                Cy = Σy / n = ${sumY} / ${yValues.length} = ${centroidY.toFixed(2)}<br>
+            `;
+
+            // Display gradient and best fit line information
+            const gradientDisplay = document.getElementById('gradient-display');
+            gradientDisplay.innerHTML = 
+                `Gradient (Slope): ${slope.toFixed(2)}<br>
+                Best Fit Line:<br>
+                y = ${slope.toFixed(2)}x + ${intercept.toFixed(2)}<br>
+                Line touches Y-axis at: (0, ${intercept.toFixed(2)})<br>
+                Line touches X-axis at: (${(-intercept/slope).toFixed(2)}, 0)<br>
+            `;
+        }
+
+        function clearGraph() {
+            document.getElementById('graph-title').value = '';
+            document.getElementById('x-values').value = '';
+            document.getElementById('y-values').value = '';
+            document.getElementById('x-label').value = '';
+            document.getElementById('y-label').value = '';
+            let canvas = document.getElementById('plot');
+            let ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('centroid-display').innerHTML = '';
+            document.getElementById('gradient-display').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

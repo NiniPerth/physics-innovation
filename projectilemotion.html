@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projectile Motion Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Projectile Motion Calculator</h1>
+        <nav>
+            <ul>
+                <li><a href="fizik.html">Home</a></li>
+                <li><a href="linearmotion.html">Linear Motion</a></li>
+                <li><a href="graph.html">Graph</a></li>
+                <li><a href="image-solver.html">Image Solver</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="projectile-motion">
+            <h2>Projectile Motion Calculations</h2>
+            <p>Calculate detailed projectile motion parameters.</p>
+
+            <label for="case">Select Projectile Case:</label>
+            <select id="case" onchange="updateFields()">
+                <option value="ground">Launched from Ground</option>
+                <option value="elevated">Launched from Elevated Height</option>
+                <option value="horizontal">Launched Horizontally from Height</option>
+            </select>
+
+            <label for="initial-velocity">Initial Velocity (v₀ in m/s):</label>
+            <input type="number" id="initial-velocity" placeholder="Initial velocity (v₀)">
+
+            <label for="angle">Launch Angle (θ in degrees):</label>
+            <input type="number" id="angle" placeholder="Launch angle (θ)" value="45">
+
+            <label for="height">Initial Height (h₀ in meters):</label>
+            <input type="number" id="height" placeholder="Initial height (h₀)" value="0">
+
+            <label for="gravity">Gravity (g in m/s²):</label>
+            <input type="number" id="gravity" placeholder="Gravity (9.81 by default)" value="9.81">
+
+            <label for="equation">Select Equation:</label>
+            <select id="equation" onchange="displayEquation()">
+                <option value="default">Select an equation</option>
+                <option value="time_of_flight">Time of Flight</option>
+                <option value="range">Range</option>
+                <option value="max_height">Maximum Height</option>
+            </select>
+
+            <button onclick="calculateProjectileMotion()">Calculate</button>
+            <button onclick="clearInputs()">Clear</button>
+
+            <h3>Results</h3>
+            <p>Horizontal Velocity: <span id="horizontal-velocity">0</span> m/s</p>
+            <p>Vertical Velocity: <span id="vertical-velocity">0</span> m/s</p>
+            <p>Total Time of Flight: <span id="time-of-flight">0</span> s</p>
+            <p>Time to Maximum Height: <span id="time-to-max-height">0</span> s</p>
+            <p>Maximum Height: <span id="max-height">0</span> meters</p>
+            <p>Range: <span id="range">0</span> meters</p>
+
+            <h3>Calculations</h3>
+            <div id="calculations"></div>
+        </section>
+    </main>
+
+    <script>
+        function updateFields() {
+            const caseType = document.getElementById('case').value;
+            const angleInput = document.getElementById('angle');
+
+            if (caseType === "horizontal") {
+                angleInput.value = 0; // Set angle to 0 for horizontal launch
+                angleInput.disabled = true; // Disable angle input
+            } else {
+                angleInput.disabled = false; // Enable angle input
+                angleInput.value = 45; // Default angle for other cases
+            }
+        }
+
+        function displayEquation() {
+            const equationType = document.getElementById('equation').value;
+            const calculationsDiv = document.getElementById('calculations');
+            calculationsDiv.innerHTML = ""; // Clear previous calculations
+
+            if (equationType === "time_of_flight") {
+                calculationsDiv.innerHTML = "<p>Equation: \( T = \frac{v_0 \sin(θ) + \sqrt{(v_0 \sin(θ))^2 + 2gh_0}}{g} \)</p>";
+            } else if (equationType === "range") {
+                calculationsDiv.innerHTML = "<p>Equation: \( R = v_0 \cos(θ) \times T \)</p>";
+            } else if (equationType === "max_height") {
+                calculationsDiv.innerHTML = "<p>Equation: \( H = h_0 + \frac{(v_0 \sin(θ))^2}{2g} \)</p>";
+            }
+        }
+
+        function calculateProjectileMotion() {
+            let v0 = Number(document.getElementById('initial-velocity').value);
+            let theta = Number(document.getElementById('angle').value) * Math.PI / 180; // Convert angle to radians
+            let h0 = Number(document.getElementById('height').value);
+            let g = Number(document.getElementById('gravity').value);
+            const caseType = document.getElementById('case').value;
+
+            // Horizontal and vertical velocity components
+            let horizontalVelocity = v0 * Math.cos(theta);
+            let verticalVelocity = v0 * Math.sin(theta);
+
+            document.getElementById('horizontal-velocity').innerText = horizontalVelocity.toFixed(2);
+            document.getElementById('vertical-velocity').innerText = verticalVelocity.toFixed(2);
+
+            let timeOfFlight, maxHeight, timeToMaxHeight;
+
+            if (caseType === "ground") {
+                timeToMaxHeight = verticalVelocity / g;
+                document.getElementById('time-to-max-height').innerText = timeToMaxHeight.toFixed(2);
+
+                timeOfFlight = (v0 * Math.sin(theta) + Math.sqrt((v0 * Math.sin(theta)) ** 2 + 2 * g * h0)) / g;
+                document.getElementById('time-of-flight').innerText = timeOfFlight.toFixed(2);
+
+                let range = horizontalVelocity * timeOfFlight;
+                document.getElementById('range').innerText = range.toFixed(2);
+
+                maxHeight = h0 + (verticalVelocity ** 2) / (2 * g);
+                document.getElementById('max-height').innerText = maxHeight.toFixed(2);
+            } else if (caseType === "elevated") {
+                timeToMaxHeight = verticalVelocity / g;
+                document.getElementById('time-to-max-height').innerText = timeToMaxHeight.toFixed(2);
+
+                let a = 0.5 * g;
+                let b = -verticalVelocity;
+                let c = h0;
+
+                let discriminant = Math.sqrt(b * b - 4 * a * c);
+                let timeOfFlight1 = (-b + discriminant) / (2 * a);
+                let timeOfFlight2 = (-b - discriminant) / (2 * a);
+                timeOfFlight = Math.max(timeOfFlight1, timeOfFlight2);
+                document.getElementById('time-of-flight').innerText = timeOfFlight.toFixed(2);
+
+                let range = horizontalVelocity * timeOfFlight;
+                document.getElementById('range').innerText = range.toFixed(2);
+
+                maxHeight = h0 + (verticalVelocity ** 2) / (2 * g);
+                document.getElementById('max-height').innerText = maxHeight.toFixed(2);
+            } else if (caseType === "horizontal") {
+                timeOfFlight = Math.sqrt((2 * h0) / g);
+                document.getElementById('time-of-flight').innerText = timeOfFlight.toFixed(2);
+
+                let range = horizontalVelocity * timeOfFlight;
+                document.getElementById('range').innerText = range.toFixed(2);
+
+                document.getElementById('max-height').innerText = h0.toFixed(2);
+                document.getElementById('time-to-max-height').innerText = '0';
+            }
+        }
+
+        function clearInputs() {
+            document.getElementById('initial-velocity').value = '';
+            document.getElementById('angle').value = '45'; // Default angle
+            document.getElementById('height').value = '';
+            document.getElementById('gravity').value = '9.81';
+            document.getElementById('equation').selectedIndex = 0; // Reset equation selection
+
+            document.getElementById('horizontal-velocity').innerText = '0';
+            document.getElementById('vertical-velocity').innerText = '0';
+            document.getElementById('time-of-flight').innerText = '0';
+            document.getElementById('time-to-max-height').innerText = '0';
+            document.getElementById('max-height').innerText = '0';
+            document.getElementById('range').innerText = '0';
+            document.getElementById('calculations').innerHTML = ''; // Clear calculations
+        }
+    </script>
+</body>
+</html>

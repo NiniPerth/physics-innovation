@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Motion Calculator</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            background-color: #e3f2fd; /* Light blue background */
+        }
+        header {
+            background-color: #1e88e5; /* Deep blue for the header */
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            border-bottom: 3px solid #0d47a1; /* Darker blue border */
+        }
+        main {
+            padding: 20px;
+        }
+        section {
+            background-color: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #1e88e5;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #ff9800;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #ef6c00;
+        }
+        #result-display {
+            margin-top: 20px;
+        }
+        #result-display p {
+            font-weight: bold;
+        }
+        #equation-suggestions {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border: 1px solid #1e88e5;
+            border-radius: 5px;
+        }
+        #calculation-steps {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #fff3e0;
+            border: 1px solid #ff9800;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Linear Motion Calculator</h1>
+        <nav>
+            <ul>
+                <li><a href="fizik.html">Home</a></li>
+                <li><a href="projectilemotion.html">Projectile Motion</a></li>
+                <li><a href="graph.html">Graph</a></li>
+				<li><a href="image-solver.html">Image Solver</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="linear-motion">
+            <h2>Calculate Linear Motion Parameters</h2>
+            <p>Select a calculation to perform:</p>
+
+            <label for="calculation-type">Choose calculation:</label>
+            <select id="calculation-type" onchange="updateEquations()">
+                <option value="displacement">Displacement (s)</option>
+                <option value="final-velocity">Final Velocity (v)</option>
+                <option value="initial-velocity">Initial Velocity (u)</option>
+                <option value="acceleration">Acceleration (a)</option>
+                <option value="time">Time (t)</option>
+            </select>
+
+            <div id="equation-suggestions">
+                <h3>Suggested Equations:</h3>
+                <select id="equation-select" onchange="updateSelectedEquation()">
+                    <option value="">Select an equation</option>
+                </select>
+                <p id="suggestions">Select a calculation to see suggestions.</p>
+            </div>
+
+            <div id="inputs">
+                <label for="initial-velocity">Initial Velocity (u):</label>
+                <input type="number" id="initial-velocity" placeholder="Initial velocity (u)">
+
+                <label for="final-velocity">Final Velocity (v):</label>
+                <input type="number" id="final-velocity" placeholder="Final velocity (v)">
+
+                <label for="acceleration">Acceleration (a):</label>
+                <input type="number" id="acceleration" placeholder="Acceleration (a)">
+
+                <label for="time">Time (t):</label>
+                <input type="number" id="time" placeholder="Time (t)">
+
+                <label for="displacement">Displacement (s):</label>
+                <input type="number" id="displacement" placeholder="Displacement (s)">
+            </div>
+
+            <button onclick="performCalculation()">Calculate</button>
+
+            <h3>Results:</h3>
+            <div id="result-display">
+                <p>Displacement (s): <span id="displacement-result">N/A</span></p>
+                <p>Final Velocity (v): <span id="final-velocity-result">N/A</span></p>
+                <p>Initial Velocity (u): <span id="initial-velocity-result">N/A</span></p>
+                <p>Acceleration (a): <span id="acceleration-result">N/A</span></p>
+                <p>Time (t): <span id="time-result">N/A</span></p>
+            </div>
+
+            <h3>Calculation Steps:</h3>
+            <div id="calculation-steps">
+                <p id="steps-display">No calculations performed yet.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let selectedEquation = '';
+
+        function updateEquations() {
+            const type = document.getElementById('calculation-type').value;
+            const suggestions = document.getElementById('suggestions');
+            const equationSelect = document.getElementById('equation-select');
+
+            equationSelect.innerHTML = '<option value="">Select an equation</option>'; // Clear previous options
+
+            switch (type) {
+                case 'displacement':
+                    suggestions.innerHTML = `
+                        Use the equations: <br>
+                        1. s = ut + (1/2)at² <br>
+                        2. s = vt - (1/2)at² <br>
+                        3. s = (u + v)/2 * t`;
+                    equationSelect.innerHTML += `
+                        <option value="s1">s = ut + (1/2)at²</option>
+                        <option value="s2">s = vt - (1/2)at²</option>
+                        <option value="s3">s = (u + v)/2 * t</option>`;
+                    break;
+                case 'final-velocity':
+                    suggestions.innerHTML = `
+                        Use the equations: <br>
+                        1. v = u + at <br>
+                        2. v² = u² + 2as <br>
+                        3. v = s/t + u`;
+                    equationSelect.innerHTML += `
+                        <option value="v1">v = u + at</option>
+                        <option value="v2">v² = u² + 2as</option>
+                        <option value="v3">v = s/t + u</option>`;
+                    break;
+                case 'initial-velocity':
+                    suggestions.innerHTML = `
+                        Use the equations: <br>
+                        1. u = (s - (1/2)at²) / t <br>
+                        2. u = v - at <br>
+                        3. u = s/t - (1/2)at`;
+                    equationSelect.innerHTML += `
+                        <option value="u1">u = (s - (1/2)at²) / t</option>
+                        <option value="u2">u = v - at</option>
+                        <option value="u3">u = s/t - (1/2)at</option>`;
+                    break;
+                case 'acceleration':
+                    suggestions.innerHTML = `
+                        Use the equations: <br>
+                        1. a = (s - ut) / (1/2)t² <br>
+                        2. a = (v - u) / t <br>
+                        3. a = (v² - u²) / (2s)`;
+                    equationSelect.innerHTML += `
+                        <option value="a1">a = (s - ut) / (1/2)t²</option>
+                        <option value="a2">a = (v - u) / t</option>
+                        <option value="a3">a = (v² - u²) / (2s)</option>`;
+                    break;
+                case 'time':
+                    suggestions.innerHTML = `
+                        Use the equations: <br>
+                        1. t = (v - u) / a <br>
+                        2. t = (s - ut) / (1/2)a <br>
+                         3. t = (2s) / (u + v)`;
+                    equationSelect.innerHTML += `
+                        <option value="t1">t = (v - u) / a</option>
+                        <option value="t2">t = (s - ut) / (1/2)a</option>
+                        <option value="t3">t = (2s) / (u + v)</option>`;
+                    break;
+                default:
+                    suggestions.innerHTML = "Select a calculation to see suggestions.";
+            }
+        }
+
+        function updateSelectedEquation() {
+            selectedEquation = document.getElementById('equation-select').value;
+        }
+
+        function clearResults() {
+            document.getElementById('displacement-result').innerText = 'N/A';
+            document.getElementById('final-velocity-result').innerText = 'N/A';
+            document.getElementById('initial-velocity-result').innerText = 'N/A';
+            document.getElementById('acceleration-result').innerText = 'N/A';
+            document.getElementById('time-result').innerText = 'N/A';
+            document.getElementById('steps-display').innerText = 'No calculations performed yet.';
+        }
+
+        function performCalculation() {
+            let u = Number(document.getElementById('initial-velocity').value);
+            let v = Number(document.getElementById('final-velocity').value);
+            let a = Number(document.getElementById('acceleration').value);
+            let t = Number(document.getElementById('time').value);
+            let s = Number(document.getElementById('displacement').value);
+
+            clearResults();
+
+            let calculationSteps = "";
+
+            switch (selectedEquation) {
+                case 's1': // s = ut + (1/2)at²
+                    if (!isNaN(u) && !isNaN(a) && !isNaN(t)) {
+                        s = u * t + 0.5 * a * t * t;
+                        document.getElementById('displacement-result').innerText = s.toFixed(2);
+                        calculationSteps = `Using the formula: s = ut + (1/2)at² <br>
+                                            Substituting values: s = ${u} * ${t} + (1/2) * ${a} * ${t}² <br>
+                                            Calculated Displacement (s): ${s.toFixed(2)}`;
+                    } else {
+                        document.getElementById('displacement-result').innerText = 'Please provide initial velocity, acceleration, and time.';
+                    }
+                    break;
+                case 's2': // s = vt - (1/2)at²
+                    if (!isNaN(v) && !isNaN(a) && !isNaN(t)) {
+                        s = v * t - 0.5 * a * t * t;
+                        document.getElementById('displacement-result').innerText = s.toFixed(2);
+                        calculationSteps = `Using the formula: s = vt - (1/2)at² <br>
+                                            Substituting values: s = ${v} * ${t} - (1/2) * ${a} * ${t}² <br>
+                                            Calculated Displacement (s): ${s.toFixed(2)}`;
+                    } else {
+                        document.getElementById('displacement-result').innerText = 'Please provide final velocity, acceleration, and time.';
+                    }
+                    break;
+                case 's3': // s = (u + v)/2 * t
+                    if (!isNaN(u) && !isNaN(v) && !isNaN(t)) {
+                        s = (u + v) / 2 * t;
+                        document.getElementById('displacement-result').innerText = s.toFixed(2);
+                        calculationSteps = `Using the formula: s = (u + v)/2 * t <br>
+                                            Substituting values: s = (${u} + ${v}) / 2 * ${t} <br>
+                                            Calculated Displacement (s): ${s.toFixed(2)}`;
+                    } else {
+                        document.getElementById('displacement-result').innerText = 'Please provide initial velocity, final velocity, and time.';
+                    }
+                    break;
+                case 'v1': // v = u + at
+                    if (!isNaN(u) && !isNaN(a) && !isNaN(t)) {
+                        v = u + a * t;
+                        document.getElementById('final-velocity-result').innerText = v.toFixed(2);
+                        calculationSteps = `Using the formula: v = u + at <br>
+                                            Substituting values: v = ${u} + ${a} * ${t} <br>
+                                            Calculated Final Velocity (v): ${v.toFixed(2)}`;
+                    } else {
+                        document.getElementById('final-velocity-result').innerText = 'Please provide initial velocity, acceleration, and time.';
+                    }
+                    break;
+                case 'v2': // v² = u² + 2as
+                    if (!isNaN(u) && !isNaN(a) && !isNaN(s)) {
+                        v = Math.sqrt(u * u + 2 * a * s);
+                        document.getElementById('final-velocity-result').innerText = v.toFixed(2);
+                        calculationSteps = `Using the formula: v² = u² + 2as <br>
+                                            Substituting values: v = √(${u}² + 2 * ${a} * ${s}) <br>
+                                            Calculated Final Velocity (v): ${v.toFixed(2)}`;
+                    } else {
+                        document.getElementById('final-velocity-result').innerText = 'Please provide initial velocity, acceleration, and displacement.';
+                    }
+                    break;
+                case 'v3': // v = s/t + u
+                    if (!isNaN(s) && !isNaN(t) && !isNaN(u)) {
+                        v = s / t + u;
+                        document.getElementById('final-velocity-result').innerText = v.toFixed(2);
+                        calculationSteps = `Using the formula: v = s/t + u <br>
+                                            Substituting values: v = ${s} / ${t} + ${u} <br>
+                                            Calculated Final Velocity (v): ${v.toFixed(2)}`;
+                    } else {
+                        document.getElementById('final-velocity-result').innerText = 'Please provide displacement, time, and initial velocity.';
+                    }
+                    break;
+                case 'u1': // u = (s - (1/2)at²) / t
+                    if (!isNaN(s) && !isNaN(a) && !isNaN(t)) {
+                        u = (s - 0.5 * a * t * t) / t;
+                        document.getElementById('initial-velocity-result').innerText = u.toFixed(2);
+                        calculationSteps = `Using the formula: u = (s - (1/2)at²) / t <br>
+                                            Substituting values: u = (${s} - (1/2) * ${a} * ${t}²) / ${t} <br>
+                                            Calculated Initial Velocity (u): ${u.toFixed(2)}`;
+                    } else {
+                        document.getElementById('initial-velocity-result').innerText = 'Please provide displacement, acceleration, and time.';
+                    }
+                    break;
+                case 'u2': // u = v - at
+                    if (!isNaN(v) && !isNaN(a) && !isNaN(t)) {
+                        u = v - a * t;
+                        document.getElementById('initial-velocity-result').innerText = u.toFixed(2);
+                        calculationSteps = `Using the formula: u = v - at <br>
+                                            Substituting values: u = ${v} - ${a} * ${t} <br>
+                                            Calculated Initial Velocity (u): ${u.toFixed(2)}`;
+                    } else {
+                        document.getElementById('initial-velocity-result').innerText = 'Please provide final velocity, acceleration, and time.';
+                    }
+                    break;
+                case 'u3': // u = s/t - (1/2)at
+                    if (!isNaN(s) && !isNaN(t) && !isNaN(a)) {
+                        u = s / t - 0.5 * a * t;
+                        document.getElementById('initial-velocity-result').innerText = u.toFixed(2);
+                        calculationSteps = `Using the formula: u = s/t - (1/2)at <br>
+                                            Substituting values: u = ${s} / ${t} - (1/2) * ${a} * ${t} <br>
+                                            Calculated Initial Velocity (u): ${u.toFixed(2)}`;
+                    } else {
+                        document.getElementById('initial-velocity-result').innerText = 'Please provide displacement, time, and acceleration.';
+                    }
+                    break;
+                case 'a1': // a = (s - ut) / (1/2)t²
+                    if (!isNaN(s) && !isNaN(u) && !isNaN(t)) {
+                        a = (s - u * t) / (0.5 * t * t);
+                        document.getElementById('acceleration-result').innerText = a.toFixed(2);
+                        calculationSteps = `Using the formula: a = (s - ut) / (1/2)t² <br>
+                                            Substituting values: a = (${s} - ${u} * ${t}) / (1/2) * ${t}² <br>
+                                            Calculated Acceleration (a): ${a.toFixed(2)}`;
+                    } else {
+                        document.getElementById('acceleration-result').innerText = 'Please provide displacement, initial velocity, and time.';
+                    }
+                    break;
+                case 'a2': // a = (v - u) / t
+                    if (!isNaN(v) && !isNaN(u) && !isNaN(t)) {
+                        a = (v - u) / t;
+                        document.getElementById('acceleration-result').innerText = a.toFixed(2);
+                        calculationSteps = `Using the formula: a = (v - u) / t <br>
+                                            Substituting values: a = (${v} - ${u}) / ${t} <br>
+                                            Calculated Acceleration (a): ${a.toFixed(2)}`;
+                    } else {
+                        document.getElementById('acceleration-result').innerText = 'Please provide final velocity, initial velocity, and time.';
+                    }
+                    break;
+                case 'a3': // a = (v² - u²) / (2s)
+                    if (!isNaN(v) && !isNaN(u) && !isNaN(s)) {
+                        a = (v * v - u * u) / (2 * s);
+                        document.getElementById('acceleration-result').innerText = a.toFixed(2);
+                        calculationSteps = `Using the formula: a = (v² - u²) / (2s) <br>
+                                            Substituting values: a = (${v}² - ${u}²) / (2 * ${s}) <br>
+                                            Calculated Acceleration (a): ${a.toFixed(2)}`;
+                    } else {
+                        document.getElementById('acceleration-result').innerText = 'Please provide final velocity, initial velocity, and displacement.';
+                    }
+                    break;
+                case 't1': // t = (v - u) / a
+                    if (!isNaN(v) && !isNaN(u) && !isNaN(a)) {
+                        t = (v - u) / a;
+                        document.getElementById('time-result').innerText = t.toFixed(2);
+                        calculationSteps = `Using the formula: t = (v - u) / a <br>
+                                            Substituting values: t = (${v} - ${u}) / ${a} <br>
+                                            Calculated Time (t): ${t.toFixed(2)}`;
+                    } else {
+                        document.getElementById('time-result').innerText = 'Please provide final velocity, initial velocity, and acceleration.';
+                    }
+                    break;
+                case 't2': // t = (s - ut) / (1/2)a
+                    if (!isNaN(s) && !isNaN(u) && !isNaN(a)) {
+                        t = (s - u * t) / (0.5 * a);
+                        document.getElementById('time-result').innerText = t.toFixed(2);
+                        calculationSteps = `Using the formula: t = (s - ut) / (1/2)a <br>
+                                            Substituting values: t = (${s} - ${u} * ${t}) / (1/2) * ${a} <br>
+                                            Calculated Time (t): ${t.toFixed(2)}`;
+                    } else {
+                        document.getElementById('time-result').innerText = 'Please provide displacement, initial velocity, and acceleration.';
+                    }
+                    break;
+                case 't3': // t = (2s) / (u + v)
+                    if (!isNaN(s) && !isNaN(u) && !isNaN(v)) {
+                        t = (2 * s) / (u + v);
+                        document.getElementById('time-result').innerText = t.toFixed(2);
+                        calculationSteps = `Using the formula: t = (2s) / (u + v) <br>
+                                            Substituting values: t = (2 * ${s}) / (${u} + ${v}) <br>
+                                            Calculated Time (t): ${t.toFixed(2)}`;
+                    } else {
+                        document.getElementById('time-result').innerText = 'Please provide displacement, initial velocity, and final velocity.';
+                    }
+                    break;
+                default:
+                    alert("Please select a valid equation.");
+            }
+
+            document.getElementById('steps-display').innerHTML = calculationSteps || "No calculations performed yet.";
+        }
+    </script>
+</body>
+</html>
