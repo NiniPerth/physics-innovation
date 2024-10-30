@@ -1,105 +1,47 @@
-body {
-    font-family: 'Courier New', Courier, monospace; /* A more technical font */
-    margin: 0;
-    padding: 20px;
-    background: url('images/background.jpg') no-repeat center center fixed; /* Physics-themed background image */
-    background-size: cover; /* Make the background cover the entire viewport */
+/* Base styles remain the same */
+
+/* Media query for landscape orientation */
+@media screen and (orientation: landscape) {
+    body {
+        padding: 30px; /* Increased padding for landscape */
+    }
+
+    header {
+        font-size: 1.5em; /* Larger font size in landscape */
+    }
+
+    section {
+        margin: 15px 0; /* Adjust margins */
+    }
+
+    button {
+        width: 50%; /* Wider buttons */
+    }
+
+    .centroid-display, .gradient-display {
+        font-size: 18px; /* Larger text in landscape */
+    }
 }
 
-header {
-    background-color: rgba(30, 136, 229, 0.8); /* Semi-transparent deep blue for the header */
-    color: white;
-    padding: 10px 0;
-    text-align: center;
-    border-bottom: 3px solid #0d47a1; /* Darker blue border for distinction */
-}
+/* Media query for portrait orientation */
+@media screen and (orientation: portrait) {
+    body {
+        padding: 20px; /* Default padding for portrait */
+    }
 
-nav ul {
-    list-style: none;
-    padding: 0;
-}
+    header {
+        font-size: 1.2em; /* Default font size */
+    }
 
-nav ul li {
-    display: inline;
-    margin-right: 15px;
-}
+    section {
+        margin: 10px 0; /* Default margins */
+    }
 
-nav ul li a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Subtle text shadow */
-}
+    button {
+        width: 80%; /* Default button width */
+    }
 
-main {
-    padding: 20px;
-}
-
-section {
-    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white for the sections */
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Modern shadow */
-    border-left: 5px solid #ff9800; /* Orange accent */
-}
-
-h2 {
-    color: #333;
-}
-
-footer {
-    text-align: center;
-    padding: 10px 0;
-    background-color: rgba(51, 51, 51, 0.8); /* Semi-transparent dark gray for the footer */
-    color: white;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
-}
-
-button {
-    background-color: #ff9800; /* Bright orange for buttons */
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
-}
-
-button:hover {
-    background-color: #ef6c00; /* Darker orange on hover */
-}
-
-/* Canvas styling for graphing */
-canvas {
-    border: 2px solid #1e88e5; /* Deep blue border for the canvas */
-    background-color: #ffffff; /* White background for the graph */
-    display: block;
-    margin: 20px auto;
-}
-
-/* Input styles */
-input[type="text"], input[type="number"], select {
-    width: 90%;
-    padding: 10px;
-    margin: 5px auto;
-    display: block;
-    border: 1px solid #1e88e5; /* Deep blue border for inputs */
-    border-radius: 5px;
-}
-
-/* Display for calculations */
-.centroid-display, .gradient-display {
-    margin-top: 10px;
-    font-size: 16px;
-    text-align: left;
-    width: 80%;
-    margin: 10px auto;
-    background-color: rgba(240, 248, 255, 0.9); /* Light semi-transparent background for text display */
-    border: 1px solid #1e88e5; /* Deep blue border */
-    padding: 10px;
-    border-radius: 5px;
+    .centroid-display, .gradient-display {
+        font-size: 16px; /* Default text size */
+    }
 }
